@@ -270,11 +270,6 @@ namespace WWTBAM.Accessibility
         {
             try
             {
-                if (!IsEnglishShow())
-                {
-                    return false;
-                }
-
                 GameObject canvasMain = GameObject.Find("Canvas/ResizedBase/Canvas_Main");
                 if (canvasMain == null || !canvasMain.activeInHierarchy)
                     return false;
