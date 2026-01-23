@@ -81,15 +81,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="answer reveal.cs" />
     <Compile Include="AnswerAccessibility.cs" />
     <Compile Include="character screen.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="difficulties.cs" />
+    <Compile Include="earningscreen.cs" />
     <Compile Include="freezegame.cs" />
     <Compile Include="game mode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuestionAccessibility.cs" />
-    <Compile Include="ResultScreenAccessibility.cs" />
     <Compile Include="shop menu.cs" />
     <Compile Include="ShopPopupAccessibility.cs" />
     <Compile Include="theme selection.cs" />

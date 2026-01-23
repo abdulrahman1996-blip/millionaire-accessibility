@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,8 +8,8 @@ using Text = UnityEngine.UI.Text;
 
 namespace WWTBAM.Accessibility
 {
-    [BepInPlugin("com.accessibility.wwtbam.result", "WWTBAM Result Screen Accessibility", "1.0.0")]
-    public class ResultScreenAccessibility : BaseUnityPlugin
+    [BepInPlugin("com.accessibility.wwtbam.earnings", "WWTBAM Earnings Screen Accessibility", "1.0.0")]
+    public class EarningsScreenAccessibility : BaseUnityPlugin
     {
         [DllImport("nvdaControllerClient64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         private static extern int nvdaController_testIfRunning();
@@ -20,18 +20,16 @@ namespace WWTBAM.Accessibility
         [DllImport("nvdaControllerClient64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         private static extern int nvdaController_cancelSpeech();
 
-        private bool isInResultScreen = false;
-        private bool resultAnnounced = false;
+        private bool isInEarningsScreen = false;
+        private bool earningsAnnounced = false;
         private bool nvdaAvailable = false;
-        private float resultEntryTime = 0f;
-        private const float RESULT_DELAY = 2.0f; // Wait 2 seconds before announcing
 
         private const float CHECK_INTERVAL = 0.15f;
         private float timeSinceLastCheck = 0f;
 
         void Awake()
         {
-            Logger.LogInfo("WWTBAM Result Screen Accessibility Plugin loaded!");
+            Logger.LogInfo("WWTBAM Earnings Screen Accessibility Plugin loaded!");
 
             try
             {
@@ -62,95 +60,86 @@ namespace WWTBAM.Accessibility
 
             timeSinceLastCheck = 0f;
 
-            bool currentlyInResultScreen = IsResultScreen();
+            bool currentlyInEarningsScreen = IsEarningsScreen();
 
-            if (currentlyInResultScreen && !isInResultScreen)
+            if (currentlyInEarningsScreen && !isInEarningsScreen)
             {
-                OnEnterResultScreen();
-                isInResultScreen = true;
+                OnEnterEarningsScreen();
+                isInEarningsScreen = true;
             }
-            else if (!currentlyInResultScreen && isInResultScreen)
+            else if (!currentlyInEarningsScreen && isInEarningsScreen)
             {
-                OnExitResultScreen();
-                isInResultScreen = false;
-            }
-            else if (currentlyInResultScreen && !resultAnnounced)
-            {
-                // Check if enough time passed before announcing
-                if (Time.time - resultEntryTime >= RESULT_DELAY)
-                {
-                    AnnounceResult();
-                }
+                OnExitEarningsScreen();
+                isInEarningsScreen = false;
             }
         }
 
-        private bool IsResultScreen()
+        private bool IsEarningsScreen()
         {
             try
             {
-                // Check Canvas_Gain (result screen)
+                // Check Canvas_Gain active
                 GameObject canvas = GameObject.Find("Canvas/Resizer/Canvas_Gain");
-                if (canvas != null && canvas.activeInHierarchy)
-                    return true;
+                if (canvas == null || !canvas.activeInHierarchy)
+                    return false;
 
-                // Alternative path
-                GameObject canvas2 = GameObject.Find("UI_Canvas_WithPostProcess/Resizer/SoloClassic/Canvas_Gain");
-                if (canvas2 != null && canvas2.activeInHierarchy)
-                    return true;
+                // CRITICAL: Skip if TIPS present (not real earnings screen!)
+                GameObject tipsObj = GameObject.Find("Canvas/Resizer/Canvas_Gain/Main/Visu_Bot/Tips");
+                if (tipsObj != null && tipsObj.activeInHierarchy)
+                {
+                    Logger.LogInfo("TIPS screen detected - skipping (not real earnings)");
+                    return false;
+                }
 
-                return false;
+                // Check if earnings text present
+                GameObject gainObj = GameObject.Find("Canvas/Resizer/Canvas_Gain/Main/Visu_Bot/Gain_Amount");
+                if (gainObj == null)
+                    return false;
+
+                Text gainText = gainObj.GetComponent<Text>();
+                if (gainText == null || string.IsNullOrEmpty(gainText.text))
+                    return false;
+
+                // Skip if placeholder amount (1,000,000)
+                if (gainText.text.Contains("1 000 000") || gainText.text.Contains("1000000"))
+                {
+                    Logger.LogInfo("Placeholder earnings detected - skipping");
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error checking result screen: {ex.Message}");
+                Logger.LogError($"Error checking earnings screen: {ex.Message}");
                 return false;
             }
         }
 
-        private void OnEnterResultScreen()
+        private void OnEnterEarningsScreen()
         {
-            Logger.LogInfo("=== ENTERED Result Screen ===");
-            resultAnnounced = false;
-            resultEntryTime = Time.time;
-            Logger.LogInfo($"Waiting {RESULT_DELAY} seconds before announcing result...");
+            Logger.LogInfo("=== ENTERED Earnings Screen ===");
+            earningsAnnounced = false;
+            AnnounceEarnings();
         }
 
-        private void AnnounceResult()
+        private void AnnounceEarnings()
         {
-            if (resultAnnounced) return;
+            if (earningsAnnounced) return;
 
             try
             {
-                // Try main path first
                 GameObject gainObj = GameObject.Find("Canvas/Resizer/Canvas_Gain/Main/Visu_Bot/Gain_Amount");
                 Text gainText = gainObj?.GetComponent<Text>();
 
-                string gainAmount = "";
                 if (gainText != null && !string.IsNullOrEmpty(gainText.text))
                 {
-                    gainAmount = gainText.text;
-                }
+                    string earnings = gainText.text;
+                    string announcement = $"Total earnings: {earnings}";
 
-                // Try alternative path
-                if (string.IsNullOrEmpty(gainAmount))
-                {
-                    GameObject gainObj2 = GameObject.Find("UI_Canvas_WithPostProcess/Resizer/SoloClassic/Canvas_Gain/Gain/Amount");
-                    if (gainObj2 != null)
-                    {
-                        Text gainText2 = gainObj2.GetComponent<Text>();
-                        if (gainText2 != null)
-                        {
-                            gainAmount = gainText2.text;
-                        }
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(gainAmount))
-                {
-                    string announcement = $"Total earnings: {gainAmount}";
                     Speak(announcement);
-                    resultAnnounced = true;
-                    Logger.LogInfo($"Result announced: {announcement}");
+                    earningsAnnounced = true;
+                    Logger.LogInfo($"Earnings announced: {announcement}");
                 }
                 else
                 {
@@ -159,15 +148,15 @@ namespace WWTBAM.Accessibility
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error announcing result: {ex.Message}");
+                Logger.LogError($"Error announcing earnings: {ex.Message}");
             }
         }
 
-        private void OnExitResultScreen()
+        private void OnExitEarningsScreen()
         {
-            Logger.LogInfo("=== EXITED Result Screen ===");
-            resultAnnounced = false;
-            isInResultScreen = false;
+            Logger.LogInfo("=== EXITED Earnings Screen ===");
+            earningsAnnounced = false;
+            isInEarningsScreen = false;
         }
 
         private void Speak(string text)
@@ -200,7 +189,7 @@ namespace WWTBAM.Accessibility
 
         void OnDestroy()
         {
-            Logger.LogInfo("WWTBAM Result Screen Accessibility Plugin unloaded");
+            Logger.LogInfo("WWTBAM Earnings Screen Accessibility Plugin unloaded");
         }
     }
 }

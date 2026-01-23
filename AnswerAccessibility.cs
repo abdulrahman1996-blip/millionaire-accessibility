@@ -108,13 +108,13 @@ namespace WWTBAM.Accessibility
             {
                 GameObject answerObj = GameObject.Find($"UI_Canvas_WithPostProcess/Resizer/SoloClassic/Canvas_Question/Unscaled/Answer_Unscaled_{letter}");
                 Text answerText = answerObj?.GetComponent<Text>();
-                
+
                 if (answerText != null && !string.IsNullOrEmpty(answerText.text))
                 {
                     // Skip placeholder
                     if (answerText.text.Trim() == "Answer")
                         return "";
-                        
+
                     return answerText.text;
                 }
             }
@@ -148,7 +148,7 @@ namespace WWTBAM.Accessibility
                     foreach (string letter in answerLetters)
                     {
                         string answerText = GetAnswerText(letter);
-                        
+
                         if (!string.IsNullOrEmpty(answerText))
                         {
                             hasRealAnswers = true;
@@ -166,37 +166,38 @@ namespace WWTBAM.Accessibility
                     }
                 }
 
-                // Monitor Orange for selection
+                // Monitor Highlight for arrow navigation (not Orange!)
                 string currentFocusedAnswer = "";
-                
+
                 foreach (string letter in answerLetters)
                 {
-                    GameObject orangeObj = GameObject.Find($"UI_Canvas_WithPostProcess/Resizer/SoloClassic/Canvas_Question/{GetAnswerPath(letter)}/Orange_{letter}");
-                    
-                    if (orangeObj == null)
+                    // Check HIGHLIGHT component (arrow navigation)
+                    GameObject highlightObj = GameObject.Find($"UI_Canvas_WithPostProcess/Resizer/SoloClassic/Canvas_Question/HighLights/{letter}_Highlight");
+
+                    if (highlightObj == null)
                     {
-                        Logger.LogWarning($"Orange_{letter} GameObject NOT FOUND");
+                        Logger.LogWarning($"{letter}_Highlight GameObject NOT FOUND");
                         continue;
                     }
 
-                    Image orangeImg = orangeObj.GetComponent<Image>();
-                    if (orangeImg == null)
+                    Image highlightImg = highlightObj.GetComponent<Image>();
+                    if (highlightImg == null)
                     {
-                        Logger.LogWarning($"Orange_{letter} Image component NULL");
+                        Logger.LogWarning($"{letter}_Highlight Image component NULL");
                         continue;
                     }
 
-                    Logger.LogInfo($"Orange_{letter} enabled = {orangeImg.enabled}");
+                    Logger.LogInfo($"{letter}_Highlight enabled = {highlightImg.enabled}");
 
-                    // If THIS answer's Orange is enabled, it's focused
-                    if (orangeImg.enabled)
+                    // If THIS answer's Highlight is enabled, it's focused
+                    if (highlightImg.enabled)
                     {
                         currentFocusedAnswer = letter;
                         Logger.LogInfo($">>> FOUND FOCUSED: {letter}");
                         break; // Found focused answer, stop checking
                     }
                 }
-                
+
                 // If we found a focused answer and it's different from last
                 if (!string.IsNullOrEmpty(currentFocusedAnswer))
                 {
@@ -204,7 +205,7 @@ namespace WWTBAM.Accessibility
                     if (!string.IsNullOrEmpty(answerText))
                     {
                         string announcement = $"{currentFocusedAnswer}, {answerText}";
-                        
+
                         if (announcement != lastAnnouncedAnswer)
                         {
                             lastAnnouncedAnswer = announcement;
