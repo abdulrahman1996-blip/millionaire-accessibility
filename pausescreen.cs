@@ -1,111 +1,143 @@
-﻿using BepInEx;
-using HarmonyLib;
-using UnityEngine;
-using UnityEngine.UI;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
+using BepInEx;
+using UnityEngine;
 
-[BepInPlugin("wwtbam.pause.screen", "WWTBAM Pause Screen Reader", "1.1.0")]
-public class WWTBAMPauseScreen : BaseUnityPlugin
+namespace MillionaireAccessibility
 {
-    static bool active = false;
-    static bool announced = false;
-    static int cursor = 0; // 0 = YES, 1 = NO
-
-    static Text questionText;
-    static Text yesText;
-    static Text noText;
-
-    void Awake()
+    [BepInPlugin("com.mike.millionaire.pause_v2", "Millionaire Pause Access V2", "2.0.0")]
+    public class PauseAccessV2 : BaseUnityPlugin
     {
-        new Harmony("wwtbam.pause.screen.harmony").PatchAll();
-        Logger.LogInfo("PauseScreen Reader loaded");
-    }
+        // --- NVDA BRIDGE ---
+        [DllImport("nvdaControllerClient64.dll", CharSet = CharSet.Unicode)]
+        public static extern int nvdaController_speakText(string text);
 
-    void Update()
-    {
-        if (!active) return;
+        [DllImport("nvdaControllerClient64.dll", CharSet = CharSet.Unicode)]
+        public static extern int nvdaController_testIfRunning();
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        // --- REFERENCES ---
+        private GameObject _targetPauseCanvas; // Objek "Canvas_Pause"
+        private GameObject _targetLeavePopup;  // Objek "PopUpLeave"
+
+        // --- STATE TRACKING ---
+        private bool _isPaused = false;
+        private bool _isLeavePopupActive = false;
+        private float _scanTimer = 0f;
+
+        void Awake()
         {
-            cursor = 0;
-            Speak("Yes");
+            Logger.LogInfo("Plugin Millionaire Pause V2: Active & Searching...");
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        void Update()
         {
-            cursor = 1;
-            Speak("No");
-        }
-
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            Speak(cursor == 0 ? "Yes selected" : "No selected");
-        }
-    }
-
-    [HarmonyPatch(typeof(UnityEngine.EventSystems.EventSystem), "Update")]
-    class PauseProbe
-    {
-        static void Postfix()
-        {
-            var texts = Object.FindObjectsOfType<Text>(true);
-
-            questionText = texts.FirstOrDefault(t =>
-                t.pathContains("Canvas/Resizer/PopUp/Text"));
-
-            yesText = texts.FirstOrDefault(t =>
-                t.pathContains("Canvas/Resizer/PopUp/Image_Yes/Text"));
-
-            noText = texts.FirstOrDefault(t =>
-                t.pathContains("Canvas/Resizer/PopUp/Image_No/Text"));
-
-            if (questionText && yesText && noText)
+            // 1. Fasa Pencarian (Jika reference belum jumpa)
+            if (_targetPauseCanvas == null)
             {
-                active = true;
-
-                if (!announced)
+                _scanTimer += Time.deltaTime;
+                if (_scanTimer > 2.0f) // Scan setiap 2 saat supaya tak berat
                 {
-                    announced = true;
-                    cursor = 0;
-                    Speak("Pause menu. " + questionText.text + " Yes.");
+                    AttemptToFindUI();
+                    _scanTimer = 0f;
+                }
+                return;
+            }
+
+            // 2. Fasa Pengecekan Status (Real-time monitoring)
+            CheckPauseStatus();
+        }
+
+        void AttemptToFindUI()
+        {
+            // Cari SEMUA objek Canvas yang aktif
+            Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+
+            foreach (Canvas c in allCanvases)
+            {
+                // Taktik: Kita cari Canvas yang ada anak bernama "Resizer"
+                // Ini membezakan Main Canvas dengan UI Shell/Loading lain
+                Transform resizer = c.transform.Find("Resizer");
+
+                if (resizer != null)
+                {
+                    // Jumpa laluan yang betul! Sekarang cari Canvas_Pause
+                    Transform canvasPauseTr = resizer.Find("Canvas_Pause");
+                    if (canvasPauseTr != null)
+                    {
+                        _targetPauseCanvas = canvasPauseTr.gameObject;
+                        Logger.LogInfo("SUCCESS: Canvas_Pause found!");
+
+                        // Drill down cari Popup Leave
+                        // Path: PauseMenu -> PopupPause -> PopUpLeave
+                        Transform pauseMenu = canvasPauseTr.Find("PauseMenu");
+                        if (pauseMenu)
+                        {
+                            Transform popupPause = pauseMenu.Find("PopupPause");
+                            if (popupPause)
+                            {
+                                Transform popupLeave = popupPause.Find("PopUpLeave");
+                                if (popupLeave)
+                                {
+                                    _targetLeavePopup = popupLeave.gameObject;
+                                    Logger.LogInfo("SUCCESS: PopUpLeave found!");
+                                }
+                            }
+                        }
+                    }
+                    break; // Dah jumpa, berhenti loop
                 }
             }
-            else
+        }
+
+        void CheckPauseStatus()
+        {
+            // Cek status aktif di hierarchy
+            bool currentlyPaused = _targetPauseCanvas.activeInHierarchy;
+
+            // LOGIKA PAUSE UTAMA
+            if (currentlyPaused != _isPaused)
             {
-                active = false;
-                announced = false;
+                _isPaused = currentlyPaused;
+
+                if (_isPaused)
+                {
+                    Speak("Game Paused");
+                }
+                else
+                {
+                    Speak("Game Resumed");
+                    _isLeavePopupActive = false; // Reset flag popup bila resume
+                }
+            }
+
+            // LOGIKA POPUP "LEAVE GAME" (Hanya cek bila sedang Pause)
+            if (_isPaused && _targetLeavePopup != null)
+            {
+                bool currentlyLeaving = _targetLeavePopup.activeInHierarchy;
+
+                if (currentlyLeaving != _isLeavePopupActive)
+                {
+                    _isLeavePopupActive = currentlyLeaving;
+
+                    if (_isLeavePopupActive)
+                    {
+                        Speak("Return to the main menu? Yes or No.");
+                    }
+                    else
+                    {
+                        // Jika popup tutup tapi masih pause, bermakna user tekan "No"
+                        Speak("Back to Pause Menu");
+                    }
+                }
             }
         }
-    }
 
-    // ===== NVDA =====
-    [DllImport("nvdaControllerClient64.dll", CallingConvention = CallingConvention.Cdecl)]
-    static extern int nvdaController_speakText(
-        [MarshalAs(UnmanagedType.LPWStr)] string text);
-
-    static void Speak(string text)
-    {
-        nvdaController_speakText(text);
-    }
-}
-
-// ===== helper =====
-static class TextExt
-{
-    public static bool pathContains(this Text t, string path)
-    {
-        return t && t.transform && t.transform.GetHierarchyPath().Contains(path);
-    }
-
-    public static string GetHierarchyPath(this Transform t)
-    {
-        string p = t.name;
-        while (t.parent != null)
+        void Speak(string msg)
         {
-            t = t.parent;
-            p = t.name + "/" + p;
+            if (nvdaController_testIfRunning() == 0)
+            {
+                nvdaController_speakText(msg);
+            }
         }
-        return p;
     }
 }
