@@ -7,3 +7,83 @@
 /.vs/millionaire accessibility.slnx/v18/DocumentLayout.backup.json
 /.vs/millionaire accessibility.slnx/FileContentIndex/a69e3b8e-cc2c-430a-bc2b-d0a40997b3c0.vsidx
 /.vs/millionaire accessibility.slnx/v18/.suo
+/.vs
+/bin/Debug/0Harmony.dll
+/bin/Debug/0Harmony.xml
+/bin/Debug/BepInEx.dll
+/bin/Debug/BepInEx.xml
+/bin/Debug/millionaire accessibility.dll
+/bin/Debug/millionaire accessibility.pdb
+/bin/Debug/Mono.Cecil.dll
+/bin/Debug/MonoMod.RuntimeDetour.dll
+/bin/Debug/MonoMod.RuntimeDetour.xml
+/bin/Debug/MonoMod.Utils.dll
+/bin/Debug/MonoMod.Utils.xml
+/bin/Debug/Unity.TextMeshPro.dll
+/bin/Debug/UnityEngine.AccessibilityModule.dll
+/bin/Debug/UnityEngine.AIModule.dll
+/bin/Debug/UnityEngine.AndroidJNIModule.dll
+/bin/Debug/UnityEngine.AnimationModule.dll
+/bin/Debug/UnityEngine.ARModule.dll
+/bin/Debug/UnityEngine.AssetBundleModule.dll
+/bin/Debug/UnityEngine.AudioModule.dll
+/bin/Debug/UnityEngine.ClothModule.dll
+/bin/Debug/UnityEngine.ClusterInputModule.dll
+/bin/Debug/UnityEngine.ClusterRendererModule.dll
+/bin/Debug/UnityEngine.CoreModule.dll
+/bin/Debug/UnityEngine.CrashReportingModule.dll
+/bin/Debug/UnityEngine.DirectorModule.dll
+/bin/Debug/UnityEngine.dll
+/bin/Debug/UnityEngine.DSPGraphModule.dll
+/bin/Debug/UnityEngine.GameCenterModule.dll
+/bin/Debug/UnityEngine.GridModule.dll
+/bin/Debug/UnityEngine.ImageConversionModule.dll
+/bin/Debug/UnityEngine.IMGUIModule.dll
+/bin/Debug/UnityEngine.InputLegacyModule.dll
+/bin/Debug/UnityEngine.InputModule.dll
+/bin/Debug/UnityEngine.JSONSerializeModule.dll
+/bin/Debug/UnityEngine.LocalizationModule.dll
+/bin/Debug/UnityEngine.ParticleSystemModule.dll
+/bin/Debug/UnityEngine.PerformanceReportingModule.dll
+/bin/Debug/UnityEngine.Physics2DModule.dll
+/bin/Debug/UnityEngine.PhysicsModule.dll
+/bin/Debug/UnityEngine.ScreenCaptureModule.dll
+/bin/Debug/UnityEngine.SharedInternalsModule.dll
+/bin/Debug/UnityEngine.SpriteMaskModule.dll
+/bin/Debug/UnityEngine.SpriteShapeModule.dll
+/bin/Debug/UnityEngine.StreamingModule.dll
+/bin/Debug/UnityEngine.SubsystemsModule.dll
+/bin/Debug/UnityEngine.TerrainModule.dll
+/bin/Debug/UnityEngine.TerrainPhysicsModule.dll
+/bin/Debug/UnityEngine.TextCoreModule.dll
+/bin/Debug/UnityEngine.TextRenderingModule.dll
+/bin/Debug/UnityEngine.TilemapModule.dll
+/bin/Debug/UnityEngine.UI.dll
+/bin/Debug/UnityEngine.UIElementsModule.dll
+/bin/Debug/UnityEngine.UIElementsNativeModule.dll
+/bin/Debug/UnityEngine.UIModule.dll
+/bin/Debug/UnityEngine.UNETModule.dll
+/bin/Debug/UnityEngine.UnityAnalyticsModule.dll
+/bin/Debug/UnityEngine.UnityConnectModule.dll
+/bin/Debug/UnityEngine.UnityCurlModule.dll
+/bin/Debug/UnityEngine.UnityWebRequestAssetBundleModule.dll
+/bin/Debug/UnityEngine.UnityWebRequestAudioModule.dll
+/bin/Debug/UnityEngine.UnityWebRequestModule.dll
+/bin/Debug/UnityEngine.UnityWebRequestTextureModule.dll
+/bin/Debug/UnityEngine.UnityWebRequestWWWModule.dll
+/bin/Debug/UnityEngine.VehiclesModule.dll
+/bin/Debug/UnityEngine.VFXModule.dll
+/bin/Debug/UnityEngine.VideoModule.dll
+/bin/Debug/UnityEngine.VirtualTexturingModule.dll
+/bin/Debug/UnityEngine.VRModule.dll
+/bin/Debug/UnityEngine.WindModule.dll
+/bin/Debug/UnityEngine.XRModule.dll
+/obj/Debug
+/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
+/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/obj/Debug/milliona.0512F3BF.Up2Date
+/obj/Debug/millionaire accessibility.csproj.AssemblyReference.cache
+/obj/Debug/millionaire accessibility.csproj.CoreCompileInputs.cache
+/obj/Debug/millionaire accessibility.csproj.FileListAbsolute.txt
+/obj/Debug/millionaire accessibility.dll
+/obj/Debug/millionaire accessibility.pdb
