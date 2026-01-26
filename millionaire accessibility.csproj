@@ -91,6 +91,7 @@
     <Compile Include="freezegame.cs" />
     <Compile Include="game mode.cs" />
     <Compile Include="life line.cs" />
+    <Compile Include="optionsscreen.cs" />
     <Compile Include="pausescreen.cs" />
     <Compile Include="phone a friend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -98,7 +99,6 @@
     <Compile Include="shop menu.cs" />
     <Compile Include="ShopPopupAccessibility.cs" />
     <Compile Include="theme selection.cs" />
-    <Compile Include="uiprobe.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
